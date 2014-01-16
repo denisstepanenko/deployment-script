@@ -41,7 +41,7 @@ trap incrementErrorCount ERR
 prepareEnvironment(){
 	#$1 - if --ignore-dependencies parameter was passed in, don't try to install apache, mysql etc.
 
-	if [ "$SERVER_INSTANCE" = "test" ] && [ "$PRODUCTION_PWD" = "" ]
+	if [ "$SERVER_INSTANCE" = "test" ] && [ "$PRODUCTION_PWD" = "--hide-passwd" ]
 	then
 		#production server password only needed when this script is run on test server
 		#reads password for root on production. For security reasons this password cannot be stored in the script.
@@ -442,8 +442,8 @@ decrementErrorCount(){
 
 start(){
 	#$1 - is the individual step to run, can be one of the following values (without quotes): "build", "integration", "test", "deployment"
-	#$2 - this param indicates whether the script is executing locally or remotely	
-	#$3 - production password
+	#$2 - "test" or "live" - this param indicates whether the script is executing locally or remotely	
+	#$3 - production password or "--hide-passwd"
 	#$4 - "--ignore-dependencies", if used then dependencies won't be installed
 	#$5 - "--ignore-dependencies-remote", if used the dependencies won't be installed remotelly
 	
