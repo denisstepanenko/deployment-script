@@ -3,7 +3,9 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB=$DIR/../../lib/lib.sh
 
-workingDir=$($LIB getUniqueName sqltest)
+echo "Testing executeSqlScript"
+
+workingDir="/tmp/$($LIB getUniqueName sqltest)"
 
 mkdir $workingDir
 

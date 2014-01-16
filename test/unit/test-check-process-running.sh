@@ -1,9 +1,12 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB=$DIR/../../lib/lib.sh
+
+echo "Testing checkProcessRunning"
 
 processName="getty"
-numberOfProcesses=$($DIR/../../lib/lib.sh checkProcessRunning $processName)
+numberOfProcesses=$($LIB checkProcessRunning $processName)
 
 if [ $numberOfProcesses -gt 0 ]
 then
@@ -14,7 +17,7 @@ fi
 
 
 processName="askljdfhlakjsdhflaj"
-numberOfProcesses=$($DIR/../../lib/lib.sh checkProcessRunning $processName)
+numberOfProcesses=$($LIB checkProcessRunning $processName)
 
 if [ $numberOfProcesses -gt 0 ]
 then

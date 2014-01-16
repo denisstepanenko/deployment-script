@@ -3,6 +3,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB=$DIR/../../lib/lib.sh
 
+echo "Testing executeSqlScriptsUsingManifest"
+
 #create temp folder
 workingDir="/tmp/$($LIB getUniqueName exeSqlManifest)"
 mkdir $workingDir/sql -p #creating directories
@@ -33,7 +35,6 @@ else
 	echo "[TEST PASSED]"
 fi
 
-cd ..
 rm -rf $workingDir
 
 

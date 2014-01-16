@@ -6,7 +6,12 @@ LIB=$DIR/lib.sh
 
 getAvailableDiskSpace(){
 	#$1 is the folder of which the free space should be got from
-	echo $(df $1 -m -P | grep /dev | cut -b 36-46 | tr -d ' ')
+	if [ -d $1 ]
+	then
+		echo $(df $1 -m -P | grep /dev | cut -b 36-46 | tr -d ' ')
+	else
+		echo 0
+	fi
 }
 
 getUniqueName(){
@@ -20,8 +25,11 @@ getUniqueName(){
 checkDependencyInstalled(){
 	#$1 is the command name to be checked if installed
 	#dependencyPath=$((which $1) | tr -d ' ')
-	dependencyPath=$((dpkg --get-selections | grep $1) | tr -d ' ')
-	if [ "$dependencyPath" = "" ]
+		
+	#dependencyPath=$((dpkg --get-selections | grep "$1 .* install") | tr -d ' ')	
+	depName=$(dpkg --get-selections | grep -oP "$1") 	
+	depStatus=$(dpkg --get-selections | grep "$1" | grep -oP "deinstall") 	
+	if [ "$depName" = "" ] || [ ! "$depStatus" = "" ]
 	then
 		echo 0
 	else
@@ -41,7 +49,8 @@ installDependency(){
 removeDependency(){
 	echo "Removing '$1'..."
 	#removed dependencies
-	sudo apt-get -q -y remove $1 > /dev/null 2>&1
+	sudo apt-get -q -y autoremove $1 > /dev/null 2>&1
+	#sudo apt-get -q -y autoremove $1 
 }
 
 installMysql(){
@@ -114,7 +123,8 @@ executeSqlScriptsUsingManifest(){
 
 checkProcessRunning(){
 	#$1 is the name of the process to check
-	isRunning=$(ps -ef | grep $1 | grep -v grep | wc -l)
+	#isRunning=$(ps -ef | grep $1 | grep -v grep | wc -l)
+	isRunning=$( pgrep $1 | wc -l)
 	echo $isRunning
 }
 

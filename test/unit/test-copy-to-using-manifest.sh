@@ -1,12 +1,15 @@
-
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB=$DIR/../../lib/lib.sh
+
+echo "Testing copyToUsingManifest"
 
 #PREPARE TEST ENVIRONMENT
 #first create test directories
-inputDir="/tmp/manifest-test/input"
-outputDir="/tmp/manifest-test/output"
+baseDir="$($LIB getUniqueName manifest-test)"
+inputDir="/tmp/$baseDir/input"
+outputDir="/tmp/$baseDir/output"
 
 #first remove test dirs that could be left from last test
 #as this test doesn't remove the test dir because a tester might want to check content
@@ -16,8 +19,8 @@ rm -rf -- $outputDir
 mkdir $inputDir -p
 mkdir $outputDir -p
 
-echo "$inputDir"
-echo "$outputDir"
+# echo "$inputDir"
+# echo "$outputDir"
 
 #writing manifest
 echo "file1.txt" >> $inputDir/manifest
@@ -41,7 +44,7 @@ mkdir $inputDir/sub2
 echo "file5.txt content" >> $inputDir/sub1/sub3/file5.txt
 echo "file6.txt content" >> $inputDir/sub2/file6.txt
 
-$DIR/../../lib/lib.sh copyToUsingManifest $inputDir $outputDir $inputDir/manifest
+$LIB copyToUsingManifest $inputDir $outputDir $inputDir/manifest
 
 #ASSERTS for files that shouldn't have been copied
 if [ -d $outputDir/sub2 ]
@@ -70,7 +73,7 @@ else
         echo "$outputDir/sub2/file6.txt was not copied [TEST PASSED]"
 fi
 
-#ASSERS FOR FILES/DIRS THAT SHOULD HAVE BEEN COPIED
+#ASSERTS FOR FILES/DIRS THAT SHOULD HAVE BEEN COPIED
 
 if [ -f $outputDir/file1.txt ]
 then
@@ -78,6 +81,8 @@ then
 else
         echo "$outputDir/file1/txt was not copied [TEST FAILED]"
 fi
+
+#
 
 if [ -f $outputDir/sub1/file3.txt ]
 then
@@ -93,3 +98,4 @@ else
         echo "$outputDir/sub1/sub2/file4.txt was not copied [TEST FAILED]"
 fi
 
+rm -rf $baseDir

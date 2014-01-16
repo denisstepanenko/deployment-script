@@ -1,39 +1,43 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB=$DIR/../../lib/lib.sh
 
-echo "testing removal and re-installation of git"
+echo "Testing installDependency and removeDependency"
 
-gitInstalled=$($DIR/../../lib/lib.sh checkDependencyInstalled git)
+gitInstalled=$($LIB checkDependencyInstalled git)
+
+testGitInstall(){
+	$LIB installDependency git
+
+	gitInstalled=$($LIB checkDependencyInstalled git)
+	if [ "$gitInstalled" = "0" ]
+	then
+			echo "Git not installed [TEST FAILED]"
+	else
+			echo "Git installed [TEST PASSED]"
+	fi
+}
+
+testGitRemoval(){
+	$LIB removeDependency git
+
+	gitInstalled=$($LIB checkDependencyInstalled git)
+	if [ "$gitInstalled" = "0" ]
+	then
+		echo "Git removed [TEST PASSED]"
+	else
+		echo "Git not removed [TEST FAILED]"
+	fi
+}
 
 if [ "$gitInstalled" = "0" ]
 then
-	echo "git not installed"
-
-
-	echo "installing git"
-	$DIR/../../lib/lib.sh installDependency git
-
-	gitInstalled=$($DIR/../../lib/lib.sh checkDependencyInstalled git)
-        if [ "$gitInstalled" = "0" ]
-        then
-                echo "Git not installed [test failed]"
-        else
-                echo "Git installed [test passed]"
-        fi
-
-
+	testGitInstall
+	testGitRemoval
 else
-	echo "removing git"
-	$DIR/../../lib/lib.sh removeDependency git
-
-	gitInstalled=$($DIR/../../lib/lib.sh checkDependencyInstalled git)
-	if [ "$gitInstalled" = "0" ]
-	then
-		echo "Git removed [test passed]"
-	else
-		echo "Git not removed [test failed]"
-	fi
+	testGitRemoval	
+	testGitInstall	
 fi
 
 

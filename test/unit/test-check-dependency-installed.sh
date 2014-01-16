@@ -1,22 +1,25 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB=$DIR/../../lib/lib.sh
 
-installed=$(../../lib/lib.sh checkDependencyInstalled sudo)
+echo "Testing checkDependencyInstalled"
+
+installed=$($LIB checkDependencyInstalled sudo)
 
 
 if [ $installed -eq 0 ]
 then
-	echo "sudo not installed, [test failed]"
+	echo "sudo not installed, [TEST FAILED]"
 else
-	echo "sudo installed [test passed]"
+	echo "sudo installed [TEST PASSED]"
 fi
 
-notInstalledCommand=$(../../lib/lib.sh checkDependencyInstalled asdfasdfasdf)
+notInstalledCommand=$($LIB checkDependencyInstalled asdfasdfasdf)
 if [ $notInstalledCommand -eq 0 ]
 then
-	echo "dummy command not installed [test passed]"
+	echo "Dummy command not installed [TEST PASSED]"
 else
-	echo "dummy command installed [test failed]"
+	echo "Dummy command installed [TEST FAILED]"
 fi
 

@@ -83,10 +83,10 @@ prepareEnvironment(){
 	mkdir $BACKUP_PATH/database -p
 	
 	currentSiteSize=$($LIB getDirectorySize $LIVE_SITE_PATH)	
-	if [ ! "$currentSiteSize" = "0" ]
-	then	
+	if [ ! "$currentSiteSize" = "0" ] && [ ! "$currentSiteSize" = "4.0" ]
+	then
 		#backup site files and database, this backup will be used for rollbacks if necessary
-		cp -r $LIVE_SITE_PATH/* $BACKUP_PATH/site	
+		cp -r $LIVE_SITE_PATH/* $BACKUP_PATH/site			
 	fi
 		
 	mysqlServerInstalled=$($LIB checkDependencyInstalled mysql)
@@ -100,19 +100,19 @@ prepareEnvironment(){
 		fi
 	fi
 	
+	#check if git is installed, if not install it. GIT should always be installed, even if ignoring dependencies
+	isGitInstalled=$($LIB checkDependencyInstalled git)		
+	if [ "$isGitInstalled" = "0" ]
+	then
+		#git not installed, install it
+		$LIB installDependency git
+	fi
+	
 	#check if need to install dependencies.
 	if [ "$1" = "--ignore-dependencies" ]
 	then
 		echo "Ignoring dependency installation"
-	else
-		#check if git is installed, if not install it
-		isGitInstalled=$($LIB checkDependencyInstalled git)		
-		if [ "$isGitInstalled" = "0" ]
-		then
-			#git not installed, install it
-			$LIB installDependency git
-		fi
-
+	else	
 		#check if apache is installed, if not install it
 		isApacheInstalled=$($LIB checkDependencyInstalled apache2)
 		if [ "$isApacheInstalled" = "0" ]
@@ -173,7 +173,7 @@ buildProcess(){
 
 	#check anything was downloaded, if set error and return
 	buildInputSize=$($LIB getDirectorySize $buildInputPath)
-	if [ "$buildInputSize" = "0" ]
+	if [ "$buildInputSize" = "0" ] && [ ! "$buildInputSize" = "4.0" ]
 	then
 		echo "No content was downloaded from GIT, nothing to deploy!"
 		incrementErrorCount
@@ -181,7 +181,7 @@ buildProcess(){
 	fi
 
 	if [ -f $buildInputPath/resources-manifest ]
-	then
+	then	
 		#copy files from build/input to build/output
 		#but only copy files/dirs that are in the manifest
 		echo "Copying files to build/output using manifest"
@@ -246,7 +246,7 @@ integrationProcess(){
 	tar -zxf ../build-output.tar.gz . > /dev/null 2>&1
 
 	currentSiteSize=$($LIB getDirectorySize $LIVE_SITE_PATH)	
-	if [ ! "$currentSiteSize" = "0" ]
+	if [ ! "$currentSiteSize" = "0" ] && [ ! "$currentSiteSize" = "4.0" ]
 	then			
 		#copy current website to working directory
 		cp -r $LIVE_SITE_PATH/* $intInputSitePath
@@ -291,6 +291,7 @@ create database $LIVE_DATABASE_NAME;
 	cp -rf $intInputSitePath/* $LIVE_SITE_PATH
 	
 	#set permissions so rails can run properly
+	#these permissions are too loose, therefore should be tightened 
 	sudo chmod -R 0777 $LIVE_SITE_PATH
 	
 	#if deployment is running for the first time, run rake db:migrate to create the database
@@ -400,7 +401,8 @@ exit
 		cat $remoteSandbox/deployment.log " > $SAND_BOX_PATH/deployment/remote.sh
 
 		echo ""
-		echo "Remote Deployment Started..."
+		echo "Starting remote deployment..."
+		echo "Note that this could take at least 15 minutes if installing dependencies (depending on your internet connection speed)..."
 		remoteLog=$(sshpass -p$PRODUCTION_PWD ssh $PRODUCTION_USER@$PRODUCTION_SERVER_IP 'bash -s' < $SAND_BOX_PATH/deployment/remote.sh)
 				
 		remotePreBuildErrors=$(echo "$remoteLog" | grep "\*\*\* Pre-Build step completed with [0-9]\+ errors. \*\*\*" | grep -oP "[0-9]+")
