@@ -9,20 +9,28 @@ sudo chmod 0755 $LIB
 MIN_DISK_SPACE=300 #in MB
 LIVE_SITE_PATH="/var/www/deployment-project"
 LIVE_DATABASE_NAME="ror_test2"
-LIVE_SITE_URL="http://local.deployment.com"
-LOG_DIR="/var/logs"
+LIVE_DOMAIN_NAME="local.deployment.com"
+LIVE_SITE_URL="http://$LIVE_DOMAIN_NAME"
+LOG_DIR="/tmp/logs"
 LOG_FILE="$LOG_DIR/$($LIB getUniqueName log).log"
 LOG_TEMP="$LOG_DIR/temp"
 
 DBUSER="root"
 DBPWD="password"
 
-PRODUCTION_SERVER_IP="192.168.0.33"
+PRODUCTION_SERVER_IP="192.168.0.31"
 PRODUCTION_USER="testuser"
 PRODUCTION_PWD="password"
 
 #0=don't send, 1=send
 SEND_EMAIL=0
+
+#add hosts entry for local.deployment.com domain
+hostAdded=$(sudo less /etc/hosts | grep "$LIVE_DOMAIN_NAME")		
+if [ -z "$hostAdded" ]
+then
+	sudo echo "$PRODUCTION_SERVER_IP $LIVE_DOMAIN_NAME" >> /etc/hosts 
+fi
 
 #create log directory if doesn't exist
 if [ ! -d $LOG_TEMP ]
@@ -33,8 +41,18 @@ fi
 echo "" >> $LOG_FILE
 echo $(date) >> $LOG_FILE
 
+#check sshpass is installed. Needed for FTPing file using SFTP, this utility will enter the password for us.
+isSSHpassInstalled=$($LIB checkDependencyInstalled sshpass)
+if [ "$isSSHpassInstalled" = "0" ]
+then			
+	$LIB installDependency sshpass
+fi
+
+#sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP mkdir $remoteScriptDir -p
+#sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP 'bash -s'
+
 #check enough space available
-spaceAvailable=$($LIB getAvailableDiskSpace /var)
+spaceAvailable=$(sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP df /var -m -P | grep /dev | cut -b 36-46 | tr -d ' ')
 if [ $spaceAvailable -lt $MIN_DISK_SPACE ];
 then
 	echo "Low disk space" >> $LOG_FILE
@@ -42,7 +60,7 @@ then
 fi
 
 #check apache runs
-apacheRunning=$(ps -ef | grep "apache2" | grep -v grep | wc -l)
+apacheRunning=$(sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP ps -ef | grep apache2 | grep -v grep | wc -l)
 if [ "$apacheRunning" = "0" ]
 then
 	echo "Apache not running" >> $LOG_FILE
@@ -50,7 +68,7 @@ then
 fi
 
 #check mysql runs
-mysqlRunning=$(ps -ef | grep "mysqld" | grep -v grep | wc -l)
+mysqlRunning=$(sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP ps -ef | grep "mysqld" | grep -v grep | wc -l)
 if [ "$mysqlRunning" = "0" ]
 then
 	echo "MySQL not running" >> $LOG_FILE
@@ -68,9 +86,10 @@ then
 fi
 
 #check load average
-loadAverage=$(uptime | awk -F'[a-z]:' '{ print $2}' | awk -F',' '{ print $3}')
-echo $loadAverage
-if [ $loadAverage -gt 8.0 ]
+loadAverage=$(sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP uptime | awk -F'[a-z]:' '{ print $2}' | awk -F',' '{ print $3}')
+#loadAverage=$(echo $loadAverage | tr -d ' ')
+highLoad=$(echo "$loadAverage > 8.0" | bc)
+if [ "$highLoad" = "1" ]
 then
 	echo "Load average very high. Current value: $loadAverage" >> $LOG_FILE
 	SEND_EMAIL=1
