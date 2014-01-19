@@ -95,6 +95,44 @@ then
 	SEND_EMAIL=1
 fi
 
+vmstatResult=$(sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP vmstat -SM 10 2 | sed -n '4p')
+vmstatArr=($vmstatResult)
+
+freeRam=${vmstatArr[3]}
+contextSwitches=${vmstatArr[11]}
+userTime=${vmstatArr[12]}
+kernelTime=${vmstatArr[13]}
+
+#check number of context switches 
+if [ $contextSwitches -gt 2000 ]
+then
+	echo "Context Switches too high: $contextSwitches"
+	SEND_EMAIL=1
+fi
+
+#amount of free RAM
+if [ $freeRam -lt 100 ]
+then
+	echo "Free RAM is less than 100MB: $freeRam MB"
+	SEND_EMAIL=1
+fi
+
+#check user time
+if [ $userTime -gt 50 ]
+then
+	echo "User Time is too high: $userTime"
+	SEND_EMAIL=1
+fi
+
+#check kernel time
+if [ $kernelTime -gt 50 ]
+then
+	echo "Kernel Time is too high: $kernelTime"
+	SEND_EMAIL=1
+fi
+
+
+
 #send email if some things go over the limit
 if [ $SEND_EMAIL -eq 1 ]
 then
