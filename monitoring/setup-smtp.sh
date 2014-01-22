@@ -13,7 +13,7 @@ sudo echo "smtp_sasl_security_options = noanonymous" >> $config
 sudo echo "smtp_tls_CAfile = /etc/postfix/cacert.pem" >> $config
 sudo echo "smtp_use_tls = yes" >> $config
 
-sudo echo "[smtp.gmail.com]:587 denis.step@gmail.com:PaSsWoRd" >> /etc/postfix/sasl_passwd
+sudo echo "[smtp.gmail.com]:587 email.address@gmail.com:PaSsWoRd" >> /etc/postfix/sasl_passwd
 
 sudo chmod 400 /etc/postfix/sasl_passwd
 sudo postmap /etc/postfix/sasl_passwd
