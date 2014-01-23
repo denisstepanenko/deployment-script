@@ -136,7 +136,7 @@ fi
 #send email if some things go over the limit
 if [ $SEND_EMAIL -eq 1 ]
 then
-	mail -s "Test Postfix" denis.step@gmail.com < $LOG_FILE
+	mail -s "Test Postfix" denis.step.monitor@gmail.com < $LOG_FILE
 	#echo $SEND_EMAIL
 fi
 
