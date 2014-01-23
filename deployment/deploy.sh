@@ -306,6 +306,8 @@ create database $LIVE_DATABASE_NAME;
 	#restarting because if apache or mysql didn't stop for some odd reason, they will be restarted anyway.
 	sudo /etc/init.d/apache2 restart > /dev/null 2>&1	
 	
+	sudo chmod -R 0777 $LIVE_SITE_PATH
+	
 	#cleanup
 	rm -rf $SAND_BOX_PATH/integration
 	
