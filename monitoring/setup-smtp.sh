@@ -1,5 +1,5 @@
 # https://rtcamp.com/tutorials/linux/ubuntu-postfix-gmail-smtp/
-#install using "no configuration" option
+#install using "internet site" option
 sudo apt-get update
 sudo apt-get install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
 
