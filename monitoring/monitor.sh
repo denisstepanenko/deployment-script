@@ -13,7 +13,7 @@ LIVE_DOMAIN_NAME="local.deployment.com"
 LIVE_SITE_URL="http://$LIVE_DOMAIN_NAME"
 LOG_DIR="/tmp/logs"
 #LOG_FILE="$LOG_DIR/$($LIB getUniqueName log).log"
-LOG_FILE="monitor.log"
+LOG_FILE="$LOG_DIR/monitor.log"
 LOG_TEMP="$LOG_DIR/temp"
 
 DBUSER="root"
