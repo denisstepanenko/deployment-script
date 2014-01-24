@@ -58,6 +58,8 @@ if [ $spaceAvailable -lt $MIN_DISK_SPACE ];
 then
 	echo "Low disk space" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "Disk space OK" >> $LOG_FILE
 fi
 
 #check apache runs
@@ -66,6 +68,8 @@ if [ "$apacheRunning" = "0" ]
 then
 	echo "Apache not running" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "Apache OK" >> $LOG_FILE
 fi
 
 #check mysql runs
@@ -74,6 +78,8 @@ if [ "$mysqlRunning" = "0" ]
 then
 	echo "MySQL not running" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "MySQL OK" >> $LOG_FILE
 fi
 
 cd $LOG_TEMP
@@ -84,6 +90,8 @@ then
 	#file not found, must be due to some error. 
 	echo "Test page download failed." >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "Content retrieved from '$LIVE_SITE_URL' successfully" >> $LOG_FILE
 fi
 
 #check load average
@@ -94,6 +102,8 @@ if [ "$highLoad" = "1" ]
 then
 	echo "Load average very high. Current value: $loadAverage" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "Load average OK" >> $LOG_FILE
 fi
 
 vmstatResult=$(sshpass -p$PRODUCTION_PWD ssh -oStrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_SERVER_IP vmstat -SM 10 2 | sed -n '4p')
@@ -107,29 +117,37 @@ kernelTime=${vmstatArr[13]}
 #check number of context switches 
 if [ $contextSwitches -gt 2000 ]
 then
-	echo "Context Switches too high: $contextSwitches"
+	echo "Context Switches too high: $contextSwitches" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "Context Switches OK" >> $LOG_FILE
 fi
 
 #amount of free RAM
 if [ $freeRam -lt 100 ]
 then
-	echo "Free RAM is less than 100MB: $freeRam MB"
+	echo "Free RAM is less than 100MB: $freeRam MB" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "RAM OK" >> $LOG_FILE
 fi
 
 #check user time
 if [ $userTime -gt 50 ]
 then
-	echo "User Time is too high: $userTime"
+	echo "User Time is too high: $userTime" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "User Time OK" >> $LOG_FILE
 fi
 
 #check kernel time
 if [ $kernelTime -gt 50 ]
 then
-	echo "Kernel Time is too high: $kernelTime"
+	echo "Kernel Time is too high: $kernelTime" >> $LOG_FILE
 	SEND_EMAIL=1
+else
+	echo "Kernel Time OK" >> $LOG_FILE
 fi
 
 
