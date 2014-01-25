@@ -15,7 +15,7 @@ DBUSER="root"
 DBPWD="password"
 
 #in most cases this will be the same IP address as the "local.test2.com"
-PRODUCTION_SERVER_IP="192.168.0.31"
+PRODUCTION_SERVER_IP="192.168.1.105"
 PRODUCTION_USER="root"
 PRODUCTION_PWD=""
 
@@ -28,7 +28,7 @@ LIB=$DIR/../lib/lib.sh
 sudo chmod 0755 $LIB
 sudo chmod 0755 $DIR/content-test.sh
 
-#add hosts entry for local.deployment.com domain
+#add hosts entry for local.deployment.com domain so it can be accessed in testing step 
 hostAdded=$(sudo less /etc/hosts | grep "$LIVE_DOMAIN_NAME")		
 if [ -z "$hostAdded" ]
 then
